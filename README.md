@@ -5,7 +5,7 @@ Kadecot/GotAPI hybrid plugin
 
 # How to use
 1. Install [Kadecot](https://play.google.com/store/apps/details?id=com.sonycsl.Kadecot) and GotAPI server (such as [Device Web API Manager by GClue.inc](https://play.google.com/store/apps/details?id=org.deviceconnect.android.manager) ) to your Android phone.
-2. Install also app/build/outputs/apk/app-debug.apk in this repository.
+2. Install also app-debug.apk in this repository.
 3. Boot Kadecot as usual, then you will find GotAPI icon within devices list, as well as other smart appliances supported by Kadecot. 
 4. In settings menu (located right-top of the main activity), check the topmost "Developer mode" box
 5. Boot the GotAPI server. You will find GotAPIPlugin in "device plugins" menu.
@@ -17,9 +17,9 @@ A sample program is html/got.html. Open this file by Firefox (or other browser u
 
 You need to locate "dConnectDevicePluginSDK/" and "dConnectSDK/" in the [GotAPI source repository](https://github.com/DeviceConnect/DeviceConnect-Android) at the same level as GotAPIPlugin.
 
-+GotAPIPlugin/
-+dConnectDevicePluginSDK/
-+dConnectSDK/
+GotAPIPlugin/
+dConnectDevicePluginSDK/
+dConnectSDK/
  
 # Note that
 Kadecot JSONP API has a security hazard!
