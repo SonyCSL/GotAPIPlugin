@@ -18,8 +18,25 @@ android {
         }
     }
 }
+/////////////////////////////// Refer to local maven repositories ///////////////////////////////
+repositories{
+    flatDir {
+        dir '../../wamp/app/build/outputs/aar'
+    }
+    flatDir {
+        dir '../../kadecotcore/app/build/outputs/aar'
+    }
+}
+configurations.all {
+    // check for updates every build
+    resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+}
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'com.android.support:appcompat-v7:21.0.3'
+    compile(name:'wamp-app-debug', ext:'aar')
+    compile(name:'kadecotcore-app-debug', ext:'aar')
+
+    //compile 'com.android.support:appcompat-v7:21.0.3'
+    compile project(':dconnect-device-plugin-sdk')
+
 }
