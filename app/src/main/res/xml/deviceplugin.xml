@@ -4,5 +4,4 @@
     <profile name="serviceinformation" />
     <profile name="system" />
     <profile name="kadecot" />
-    <profile name="light" />
 </deviceplugin-provider>
