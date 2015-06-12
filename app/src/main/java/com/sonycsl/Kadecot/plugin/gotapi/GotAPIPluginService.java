@@ -1,4 +1,4 @@
-package com.sonycsl.Kadecot.plugin.deviceconnectbridge;
+package com.sonycsl.Kadecot.plugin.gotapi;
 
 import android.app.Service;
 import android.content.Intent;
@@ -21,7 +21,7 @@ import org.json.JSONObject;
 import java.util.HashSet;
 import java.util.Set;
 
-public class DeviceConnectBridgeService extends Service {
+public class GotAPIPluginService extends Service {
     private static final String LOCALHOST = "localhost";
     private static final int WEBSOCKET_PORT = 41314;
 
@@ -30,14 +30,14 @@ public class DeviceConnectBridgeService extends Service {
 
     private ProviderAccessObject mPao;
 
-    private DeviceConnectBridgeClient mClient;
+    private GotAPIClient mClient;
 
     private WampWebSocketTransport mTransport;
 
     @Override
     public void onCreate() {
         super.onCreate();
-        mClient = new DeviceConnectBridgeClient();
+        mClient = new GotAPIClient();
         mClient.setCallback(new PostReceiveCallback() {
 
             @Override
@@ -130,14 +130,14 @@ public class DeviceConnectBridgeService extends Service {
     }
 
     private KadecotCoreStore.ProtocolData getProtocolData() {
-        return new KadecotCoreStore.ProtocolData(DeviceConnectBridgeClient.PROTOCOL_NAME
+        return new KadecotCoreStore.ProtocolData(GotAPIClient.PROTOCOL_NAME
                 , "org.deviceconnect.android.manager", "org.deviceconnect.android.manager.setting.SettingActivity");
     }
 
     private Set<KadecotCoreStore.DeviceTypeData> getDeviceTypesData() {
         Set<KadecotCoreStore.DeviceTypeData> set = new HashSet<KadecotCoreStore.DeviceTypeData>();
-        set.add(new KadecotCoreStore.DeviceTypeData(DeviceConnectBridgeClient.DEVICE_TYPE_DEVICE_CONNECT,
-                DeviceConnectBridgeClient.PROTOCOL_NAME, BitmapFactory.decodeResource(getResources(),
+        set.add(new KadecotCoreStore.DeviceTypeData(GotAPIClient.DEVICE_TYPE_DEVICE_CONNECT,
+                GotAPIClient.PROTOCOL_NAME, BitmapFactory.decodeResource(getResources(),
                 R.drawable.icon)));
         return set;
     }

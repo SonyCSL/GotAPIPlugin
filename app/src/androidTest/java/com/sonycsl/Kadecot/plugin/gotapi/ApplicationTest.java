@@ -1,4 +1,4 @@
-package com.sonycsl.Kadecot.plugin.deviceconnectbridge;
+package com.sonycsl.Kadecot.plugin.gotapi;
 
 import android.app.Application;
 import android.test.ApplicationTestCase;

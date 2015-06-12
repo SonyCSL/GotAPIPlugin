@@ -1,4 +1,4 @@
-package com.sonycsl.Kadecot.plugin.deviceconnectbridge;
+package com.sonycsl.Kadecot.plugin.gotapi;
 
 import android.os.Handler;
 
@@ -22,8 +22,8 @@ import java.util.Set;
 /**
  * Created by Fumiaki on 2015/03/13.
  */
-public class DeviceConnectBridgeClient extends KadecotProtocolClient {
-    static final String PROTOCOL_NAME = "deviceconnectbridge";
+public class GotAPIClient extends KadecotProtocolClient {
+    static final String PROTOCOL_NAME = "gotapi";
 
     static final String DEVICE_TYPE_DEVICE_CONNECT = "device-connect";
 
@@ -79,7 +79,7 @@ public class DeviceConnectBridgeClient extends KadecotProtocolClient {
         }
     }
 
-    public DeviceConnectBridgeClient() {
+    public GotAPIClient() {
         mHandler = new Handler();
     }
 
@@ -115,8 +115,8 @@ public class DeviceConnectBridgeClient extends KadecotProtocolClient {
         /**
          * Call after finding device.
          */
-        registerDevice(new DeviceData.Builder(PROTOCOL_NAME, "device_connect", DEVICE_TYPE_DEVICE_CONNECT,
-                "DeviceConnectBridge", true, LOCALHOST).build());
+        registerDevice(new DeviceData.Builder(PROTOCOL_NAME, "gotapi", DEVICE_TYPE_DEVICE_CONNECT,
+                "GotAPI", true, LOCALHOST).build());
     }
 
     @Override
