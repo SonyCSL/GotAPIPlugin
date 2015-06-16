@@ -15,14 +15,10 @@ A sample program is html/got.html. Open this file by Firefox (or other browser u
 
 # How to compile
 
-You need to locate "dConnectDevicePluginSDK/" and "dConnectSDK/" in the [GotAPI source repository](https://github.com/DeviceConnect/DeviceConnect-Android) at the same level as GotAPIPlugin.
-
-GotAPIPlugin/
-dConnectDevicePluginSDK/
-dConnectSDK/
+You need to locate "dConnectDevicePluginSDK/" and "dConnectSDK/" in the [GotAPI source repository](https://github.com/DeviceConnect/DeviceConnect-Android) at the same directory level as GotAPIPlugin.
  
-# Note that
-Kadecot JSONP API has a security hazard!
+# Warning
+Kadecot JSONP API is open to any other peers within the same network. This may cause a security hazard.
 
 # ToDo
 - Autmated turning on the Kadecot developer mode (with simple confirmation)
