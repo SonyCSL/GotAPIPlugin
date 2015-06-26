@@ -1,5 +1,6 @@
 package com.sonycsl.Kadecot.plugin.gotapi;
 
+import android.content.Context;
 import android.os.Handler;
 
 import com.sonycsl.Kadecot.plugin.DeviceData;
@@ -10,12 +11,42 @@ import com.sonycsl.wamp.message.WampMessageFactory;
 import com.sonycsl.wamp.message.WampMessageType;
 import com.sonycsl.wamp.role.WampCallee;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.util.EntityUtils;
+import org.deviceconnect.message.DConnectMessage;
+import org.deviceconnect.message.basic.message.DConnectResponseMessage;
+import org.deviceconnect.message.http.impl.factory.HttpMessageFactory;
+import org.deviceconnect.profile.AuthorizationProfileConstants;
+import org.deviceconnect.profile.BatteryProfileConstants;
+import org.deviceconnect.profile.ConnectProfileConstants;
+import org.deviceconnect.profile.DeviceOrientationProfileConstants;
+import org.deviceconnect.profile.FileDescriptorProfileConstants;
+import org.deviceconnect.profile.FileProfileConstants;
+import org.deviceconnect.profile.MediaPlayerProfileConstants;
+import org.deviceconnect.profile.MediaStreamRecordingProfileConstants;
+import org.deviceconnect.profile.NotificationProfileConstants;
+import org.deviceconnect.profile.PhoneProfileConstants;
+import org.deviceconnect.profile.ProximityProfileConstants;
+import org.deviceconnect.profile.ServiceDiscoveryProfileConstants;
+import org.deviceconnect.profile.ServiceInformationProfileConstants;
+import org.deviceconnect.profile.SettingsProfileConstants;
+import org.deviceconnect.profile.SystemProfileConstants;
+import org.deviceconnect.profile.VibrationProfileConstants;
+import org.deviceconnect.utils.AuthProcesser;
+import org.deviceconnect.utils.URIBuilder;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -35,8 +66,60 @@ public class GotAPIClient extends KadecotProtocolClient {
 
     private static final String DELAY_PUBLISH_TOPIC = PRE_FIX + TOPIC + "delaypublish";
 
+    private Context mContext;
     private Handler mHandler;
 
+    private static final int GOT_API_PORT = 4035;
+
+    private HashMap<String, String> mDeviceTypeDict;
+
+    private String[] scopes = {
+            ServiceInformationProfileConstants.PROFILE_NAME,
+            AuthorizationProfileConstants.PROFILE_NAME,
+            BatteryProfileConstants.PROFILE_NAME,
+            ConnectProfileConstants.PROFILE_NAME,
+            DeviceOrientationProfileConstants.PROFILE_NAME,
+            FileDescriptorProfileConstants.PROFILE_NAME,
+            FileProfileConstants.PROFILE_NAME,
+            MediaPlayerProfileConstants.PROFILE_NAME,
+            MediaStreamRecordingProfileConstants.PROFILE_NAME,
+            ServiceDiscoveryProfileConstants.PROFILE_NAME,
+            NotificationProfileConstants.PROFILE_NAME,
+            PhoneProfileConstants.PROFILE_NAME,
+            ProximityProfileConstants.PROFILE_NAME,
+            SettingsProfileConstants.PROFILE_NAME,
+            SystemProfileConstants.PROFILE_NAME,
+            VibrationProfileConstants.PROFILE_NAME,
+
+            // 独自プロファイル "light",
+            "camera",
+            "temperature",
+            "dice",
+            "sphero",
+            "drive_controller",
+            "remote_controller",
+            "mhealth",
+
+    };
+    private AuthProcesser.AuthorizationHandler mAuthHandler
+            = new AuthProcesser.AuthorizationHandler() {
+
+        @Override
+        public void onAuthorized(final String clientId,
+                                 final String accessToken) {
+            AccessTokenPreference.setAccessToken(mContext, accessToken);
+            searchGotAPIDevice(LOCALHOST, GOT_API_PORT);
+
+        }
+
+        @Override
+        public void onAuthFailed(DConnectMessage.ErrorCode error) {
+            AccessTokenPreference.setAccessToken(mContext, null);
+        }
+
+    };
+
+    /* profile -> procedure */
     public static enum Procedure {
         PROCEDURE1("procedure1", "http://example.plugin.explanation/procedure1"),
         PROCEDURE2("procedure2", "http://example.plugin.explanation/procedure2"),
@@ -79,8 +162,10 @@ public class GotAPIClient extends KadecotProtocolClient {
         }
     }
 
-    public GotAPIClient() {
+    public GotAPIClient(Context context) {
         mHandler = new Handler();
+        mContext = context;
+        mDeviceTypeDict = new HashMap<>();
     }
 
     /**
@@ -115,8 +200,20 @@ public class GotAPIClient extends KadecotProtocolClient {
         /**
          * Call after finding device.
          */
-        registerDevice(new DeviceData.Builder(PROTOCOL_NAME, "gotapi", DEVICE_TYPE_DEVICE_CONNECT,
-                "GotAPI", true, LOCALHOST).build());
+        (new Thread(new Runnable() {
+            @Override
+            public void run() {
+                if(isGotAPIAvailable(LOCALHOST, GOT_API_PORT)) {
+                    registerDevice(new DeviceData.Builder(PROTOCOL_NAME, "gotapi", DEVICE_TYPE_DEVICE_CONNECT,
+                            "GotAPI", true, LOCALHOST).build());
+
+                    searchGotAPIDevice(LOCALHOST, GOT_API_PORT);
+                    if(AccessTokenPreference.getAccessToken(mContext) == null) {
+                        AuthProcesser.asyncAuthorize(LOCALHOST, GOT_API_PORT, false, "com.sonycsl.Kadecot.plugin.gotapi", "GotAPIPlugin", scopes, mAuthHandler);
+                    }
+                }
+            }
+        })).start();
     }
 
     @Override
@@ -168,6 +265,90 @@ public class GotAPIClient extends KadecotProtocolClient {
                     .createError(WampMessageType.INVOCATION, requestId,
                             new JSONObject(), WampError.INVALID_ARGUMENT, new JSONArray(),
                             new JSONObject()).asErrorMessage());
+        }
+    }
+
+    protected boolean isGotAPIAvailable(String host, int port) {
+        try {
+            String url = "http://"+host+":"+port+"/gotapi/system";
+            HttpGet request = new HttpGet(url);
+            DefaultHttpClient client = new DefaultHttpClient();
+            request.addHeader(DConnectMessage.HEADER_GOTAPI_ORIGIN, "com.sonycsl.Kadecot.plugin.gotapi");
+            HttpResponse response = client.execute(request);
+            if(response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+                String result = EntityUtils.toString(response.getEntity(), "UTF-8");
+                try {
+                    JSONObject root = new JSONObject(result);
+                    JSONArray plugins = root.getJSONArray("plugins");
+                    for(int i = 0; i < plugins.length(); i++) {
+                        JSONObject plugin = plugins.getJSONObject(i);
+                        String id = plugin.getString("id");
+                        String packageName = plugin.getString("packageName");
+                        mDeviceTypeDict.put(id, packageName);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                return true;
+            } else {
+                return false;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    protected void searchGotAPIDevice(String host, int port) {
+        DConnectMessage message = new DConnectResponseMessage(DConnectMessage.RESULT_ERROR);
+        String accessToken = AccessTokenPreference.getAccessToken(mContext);
+        try {
+            URIBuilder builder = new URIBuilder();
+            builder.setScheme("http");
+            builder.setProfile(ServiceDiscoveryProfileConstants.PROFILE_NAME);
+            builder.setHost(host);
+            builder.setPort(port);
+            builder.addParameter(DConnectMessage.EXTRA_ACCESS_TOKEN, accessToken);
+            HttpUriRequest request = new HttpGet(builder.build());
+            request.addHeader(DConnectMessage.HEADER_GOTAPI_ORIGIN, "com.sonycsl.Kadecot.plugin.gotapi");
+            DefaultHttpClient client = new DefaultHttpClient();
+            HttpResponse response = client.execute(request);
+            message = (new HttpMessageFactory()).newDConnectMessage(response);
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+            return;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return;
+        }
+        if (message == null) {
+
+            AccessTokenPreference.setAccessToken(mContext, null);
+            return;
+        }
+        int result = message.getInt(DConnectMessage.EXTRA_RESULT);
+        if (result == DConnectMessage.RESULT_ERROR) {
+
+            AccessTokenPreference.setAccessToken(mContext, null);
+            return;
+        }
+        List<Object> services
+                = message.getList(
+                ServiceDiscoveryProfileConstants.PARAM_SERVICES);
+        if (services != null) {
+            for (Object object: services) {
+                @SuppressWarnings("unchecked")
+                Map<String, Object> service = (Map<String, Object>) object;
+                String id = service.get(ServiceDiscoveryProfileConstants.PARAM_ID).toString();
+                String name = service.get(ServiceDiscoveryProfileConstants.PARAM_NAME).toString();
+                String protocolId = id.substring(id.indexOf('.') + 1);
+                String deviceType = mDeviceTypeDict.get(protocolId);
+                if(mContext.getPackageName().equals(deviceType)) {
+                    continue;
+                }
+                registerDevice(new DeviceData.Builder(PROTOCOL_NAME, id, deviceType,
+                        name, true, LOCALHOST).build());
+            }
         }
     }
 }

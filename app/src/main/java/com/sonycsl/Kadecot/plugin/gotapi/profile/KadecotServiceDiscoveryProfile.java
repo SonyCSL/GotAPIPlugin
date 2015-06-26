@@ -53,10 +53,6 @@ public class KadecotServiceDiscoveryProfile extends ServiceDiscoveryProfile {
      */
     public static final String DEVICE_NAME_SPECIAL_CHARACTERS = "Kadecot Service ID Special Characters";
 
-    /**
-     * テスト用デバイスタイプ.
-     */
-    public static final String DEVICE_TYPE = "Kadecot Server";
 
     /**
      * テスト用オンライン状態.
@@ -84,7 +80,7 @@ public class KadecotServiceDiscoveryProfile extends ServiceDiscoveryProfile {
         Bundle service = new Bundle();
         setId(service, SERVICE_ID);
         setName(service, DEVICE_NAME);
-        setType(service, DEVICE_TYPE);
+        setType(service, NetworkType.WIFI);
         setOnline(service, DEVICE_ONLINE);
         setConfig(service, DEVICE_CONFIG);
         setScopes(service, getProfileProvider());
