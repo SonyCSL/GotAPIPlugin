@@ -10,7 +10,6 @@ package com.sonycsl.Kadecot.plugin.gotapi;
 import android.content.Intent;
 import android.os.Bundle;
 
-import com.sonycsl.Kadecot.plugin.gotapi.profile.DummyLightProfile;
 import com.sonycsl.Kadecot.plugin.gotapi.profile.KadecotProfile;
 import com.sonycsl.Kadecot.plugin.gotapi.profile.KadecotServiceDiscoveryProfile;
 import com.sonycsl.Kadecot.plugin.gotapi.profile.KadecotServiceInformationProfile;
@@ -40,7 +39,6 @@ public class KadecotDeviceService extends DConnectMessageService {
         LocalOAuth2Main.initialize(getApplicationContext());
         //StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder().permitAll().build());
         addProfile(new KadecotProfile());
-        addProfile(new DummyLightProfile());
     }
 
     @Override
