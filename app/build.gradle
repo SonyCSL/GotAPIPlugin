@@ -1,11 +1,12 @@
-apply plugin: 'com.android.application'
+apply plugin: 'com.android.library'
+
+def commonArtifactId = 'gotapiplugin'
 
 android {
     compileSdkVersion 21
     buildToolsVersion "21.1.2"
 
     defaultConfig {
-        applicationId "com.sonycsl.Kadecot.plugin.gotapi"
         minSdkVersion 15
         targetSdkVersion 21
         versionCode 1
@@ -15,6 +16,16 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    libraryVariants.all { variant ->
+        variant.outputs.each { output ->
+            def outputFile = output.outputFile
+            if (outputFile != null && outputFile.name.endsWith('.aar')) {
+                def fileName = commonArtifactId + "-" + outputFile.name.toString()
+                output.outputFile = new File(outputFile.parent, fileName)
+            }
         }
     }
 }
@@ -35,6 +46,7 @@ configurations.all {
 dependencies {
     compile(name:'wamp-app-debug', ext:'aar')
     compile(name:'kadecotcore-app-debug', ext:'aar')
+    compile project(':libraries')
 
     //compile 'com.android.support:appcompat-v7:21.0.3'
     compile project(':dconnect-device-plugin-sdk')
