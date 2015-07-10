@@ -54,7 +54,7 @@ import java.util.Set;
  * Created by Fumiaki on 2015/03/13.
  */
 public class GotAPIClient extends KadecotProtocolClient {
-    static final String PROTOCOL_NAME = "gotapi";
+    public static final String PROTOCOL_NAME = "gotapi";
 
     static final String DEVICE_TYPE_DEVICE_CONNECT = "device-connect";
 

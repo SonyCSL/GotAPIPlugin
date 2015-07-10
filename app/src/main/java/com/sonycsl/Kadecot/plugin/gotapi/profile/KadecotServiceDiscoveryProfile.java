@@ -10,11 +10,18 @@ package com.sonycsl.Kadecot.plugin.gotapi.profile;
 import android.content.Intent;
 import android.os.Bundle;
 
+import com.sonycsl.Kadecot.plugin.gotapi.GotAPIClient;
+
 import org.deviceconnect.android.message.MessageUtils;
 import org.deviceconnect.android.profile.DConnectProfileProvider;
 import org.deviceconnect.android.profile.ServiceDiscoveryProfile;
 import org.deviceconnect.message.DConnectMessage;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -85,6 +92,48 @@ public class KadecotServiceDiscoveryProfile extends ServiceDiscoveryProfile {
         setConfig(service, DEVICE_CONFIG);
         setScopes(service, getProfileProvider());
         services.add(service);
+
+        String urlstr = "http://localhost:31413/jsonp/v1/devices/" ;
+
+        try {
+            URL url = new URL(urlstr);
+            HttpURLConnection urlCon = (HttpURLConnection)url.openConnection();
+            urlCon.setRequestMethod("GET");
+            urlCon.connect();
+
+            InputStream in = urlCon.getInputStream();
+
+            String str ="";
+            byte[] buf = new byte[1024];
+
+            while(true) {
+                int l = in.read(buf) ;
+                if( l <= 0)break;
+                str += new String(buf,0,l);
+            }
+            JSONObject devices = new JSONObject(str);
+            JSONArray deviceList = devices.getJSONArray("deviceList");
+            for(int i = 0; i < deviceList.length(); i++) {
+                JSONObject device = deviceList.getJSONObject(i);
+                String protocol = device.getString("protocol");
+                if(GotAPIClient.PROTOCOL_NAME.equals(protocol)) {
+                    continue;
+                }
+                String nickname = device.getString("nickname");
+                int deviceId = device.getInt("deviceId");
+                boolean status = device.getBoolean("status");
+                Bundle s = new Bundle();
+                setId(s, Integer.toString(deviceId));
+                setName(s, nickname);
+                setType(s, NetworkType.WIFI);
+                setOnline(s, status);
+                setConfig(s, DEVICE_CONFIG);
+                setScopes(s, getProfileProvider());
+                services.add(s);
+            }
+        } catch( Exception e){
+            e.printStackTrace();
+        }
 /*
         // サービスIDが特殊なサービス
         service = new Bundle();

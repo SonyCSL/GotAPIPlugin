@@ -68,7 +68,21 @@ function onIPSet(){
 					kservice = sv.id ;
 					$('#kadecot_service_id').text('kadecot service found : '+kservice) ;
 					searchSystem(kservice,'Kadecot');
-					break ;
+				}else if( sv.scopes.indexOf('kadecot') >= 0){
+					var builder = new dConnect.URIBuilder();
+					builder.setProfile('serviceinformation');
+					builder.setServiceId(sv.id);
+					builder.setAccessToken(accessToken);
+					var uri = builder.build();
+
+					if (DEBUG) {
+						console.log('Uri:' + uri);
+					}
+
+					dConnect.get(uri, null, function(json) {
+					}, function(errorCode, errorMessage) {
+						showError('GET /serviceinformation', errorCode, errorMessage);
+					});
 				}
 			}
 		}) ;
@@ -178,10 +192,9 @@ function onKadecotDevices(){
 
 function onSendKadecotSet(){
 	window.open('http://'+ip+':4035/gotapi/kadecot'
-		+'?deviceId='+$('#deviceid').val()
-		+'&procedure=set'
-		+'&params={"propertyName":"'+$('#property').val()+'","propertyValue":'+$('#value').val()+'}'
-		+'&serviceId='+kservice,'_blank') ;
+	    +'/set/'
+		+'?params={"propertyName":"'+$('#property').val()+'","propertyValue":'+$('#value').val()+'}'
+		+'&serviceId='+$('#deviceid').val(),'_blank') ;
 }
 
 </script>

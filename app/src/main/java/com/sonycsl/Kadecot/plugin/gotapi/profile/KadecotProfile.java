@@ -8,6 +8,7 @@ http://opensource.org/licenses/mit-license.php
 package com.sonycsl.Kadecot.plugin.gotapi.profile;
 
 import android.content.Intent;
+
 import org.deviceconnect.android.profile.DConnectProfile;
 import org.deviceconnect.message.DConnectMessage;
 
@@ -26,23 +27,21 @@ public class KadecotProfile extends DConnectProfile {
     protected boolean onGetRequest(final Intent request, final Intent response) {
         //String serviceId = getServiceID(request);
 
+        String serviceId = getServiceID(request); // deviceidに相当
+        String attribute = getAttribute(request); // procedure
+        String interfaceStr = getInterface(request); // protocol
+
+
         String urlstr = "http://localhost:31413/jsonp/v1/devices/" ;
-        String deviceId = request.getStringExtra("deviceId") ;
-        try {
-            int di = Integer.parseInt(deviceId) ;
-        } catch (NumberFormatException e){
-            deviceId = null ;
-        }
-        if( deviceId != null ){
-            urlstr += deviceId ;
-            String procedure = request.getStringExtra("procedure") ;
+        if( serviceId != null ){
+            urlstr += serviceId ;
             String params = request.getStringExtra("params") ;
-            if( procedure != null && params != null){
-                urlstr += "?procedure="+procedure+"&params="+params ;
+            if( attribute != null && params != null){
+                urlstr += "?procedure="+attribute+"&params="+params ;
             }
         }
 
-       try {
+        try {
             URL url = new URL(urlstr);
             HttpURLConnection urlCon = (HttpURLConnection)url.openConnection();
             urlCon.setRequestMethod("GET");
