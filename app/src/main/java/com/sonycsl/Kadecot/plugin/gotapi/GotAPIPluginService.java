@@ -147,7 +147,7 @@ public class GotAPIPluginService extends Service {
         Set<KadecotCoreStore.DeviceTypeData> set = new HashSet<KadecotCoreStore.DeviceTypeData>();
         set.add(new KadecotCoreStore.DeviceTypeData(GotAPIClient.DEVICE_TYPE_DEVICE_CONNECT,
                 GotAPIClient.PROTOCOL_NAME, BitmapFactory.decodeResource(getResources(),
-                R.drawable.icon)));
+                R.drawable.gotapi)));
         PackageManager pm = getPackageManager();
         List<PackageInfo> pkgList = pm.getInstalledPackages(PackageManager.GET_RECEIVERS);
         if (pkgList != null) {

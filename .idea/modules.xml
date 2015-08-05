@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/GotAPIPlugin.iml" filepath="$PROJECT_DIR$/GotAPIPlugin.iml" />
+      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../dConnectDevicePluginSDK/dconnect-device-plugin-sdk.iml" filepath="$PROJECT_DIR$/../dConnectDevicePluginSDK/dconnect-device-plugin-sdk.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../dConnectSDK/dConnectSDKForAndroid/dconnect-sdk-for-android.iml" filepath="$PROJECT_DIR$/../dConnectSDK/dConnectSDKForAndroid/dconnect-sdk-for-android.iml" />
+      <module fileurl="file://$PROJECT_DIR$/libraries/libraries.iml" filepath="$PROJECT_DIR$/libraries/libraries.iml" />
+    </modules>
+  </component>
+</project>
