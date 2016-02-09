@@ -1,6 +1,7 @@
 package com.sonycsl.Kadecot.plugin.gotapi;
 
 import android.content.Context;
+import android.net.Uri;
 import android.os.Handler;
 
 import com.sonycsl.Kadecot.plugin.DeviceData;
@@ -13,6 +14,7 @@ import com.sonycsl.wamp.role.WampCallee;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -91,7 +93,8 @@ public class GotAPIClient extends KadecotProtocolClient {
             SystemProfileConstants.PROFILE_NAME,
             VibrationProfileConstants.PROFILE_NAME,
 
-            // 独自プロファイル "light",
+            // 独自プロファイル
+            "light",
             "camera",
             "temperature",
             "dice",
@@ -124,7 +127,8 @@ public class GotAPIClient extends KadecotProtocolClient {
         PROCEDURE1("procedure1", "http://example.plugin.explanation/procedure1"),
         PROCEDURE2("procedure2", "http://example.plugin.explanation/procedure2"),
         TESTPUBLISH("testpublish", "http://example.plugin.explanation/testpublish"),
-        ECHO("echo", "http://example.plugin.explanation/echo"), ;
+        ECHO("echo", "http://example.plugin.explanation/echo"),
+        GET("get", "http://kadecot.sonycsl.com/plugin/gotapi/get"), ;
 
         private final String mUri;
         private final String mServiceName;
@@ -227,6 +231,16 @@ public class GotAPIClient extends KadecotProtocolClient {
 
         try {
             final Procedure proc = Procedure.getEnum(procedure);
+
+            if(proc == Procedure.GET) {
+                String url = argumentsKw.getString("url");
+                String result = callGetProcedure(Uri.parse(url));
+                listener.replyYield(WampMessageFactory.createYield(requestId, new JSONObject(),
+                        new JSONArray(),
+                        new JSONObject(result))
+                        .asYieldMessage());
+                return;
+            }
             if (proc == Procedure.ECHO) {
                 listener.replyYield(WampMessageFactory.createYield(requestId, new JSONObject(),
                         new JSONArray(),
@@ -260,7 +274,7 @@ public class GotAPIClient extends KadecotProtocolClient {
 
             listener.replyYield(WampMessageFactory.createYield(requestId, new JSONObject(),
                     new JSONArray(), argumentKw).asYieldMessage());
-        } catch (JSONException e) {
+        } catch (Exception e) {
             listener.replyError(WampMessageFactory
                     .createError(WampMessageType.INVOCATION, requestId,
                             new JSONObject(), WampError.INVALID_ARGUMENT, new JSONArray(),
@@ -280,10 +294,14 @@ public class GotAPIClient extends KadecotProtocolClient {
                 try {
                     JSONObject root = new JSONObject(result);
                     JSONArray plugins = root.getJSONArray("plugins");
+                    System.out.println("plugins:"+plugins.toString());
                     for(int i = 0; i < plugins.length(); i++) {
                         JSONObject plugin = plugins.getJSONObject(i);
                         String id = plugin.getString("id");
                         String packageName = plugin.getString("packageName");
+                        System.out.print("id:"+id);
+                        System.out.print(", packageName:"+packageName);
+                        System.out.println();
                         mDeviceTypeDict.put(id, packageName);
                     }
                 } catch (Exception e) {
@@ -341,14 +359,44 @@ public class GotAPIClient extends KadecotProtocolClient {
                 Map<String, Object> service = (Map<String, Object>) object;
                 String id = service.get(ServiceDiscoveryProfileConstants.PARAM_ID).toString();
                 String name = service.get(ServiceDiscoveryProfileConstants.PARAM_NAME).toString();
-                String protocolId = id.substring(id.indexOf('.') + 1);
+//                String protocolId = id.substring(id.indexOf('.') + 1);
+                int end = id.lastIndexOf(".localhost.deviceconnect.org");
+                int start = id.substring(0,end).lastIndexOf('.')+1;
+                String protocolId = id.substring(start);
                 String deviceType = mDeviceTypeDict.get(protocolId);
                 if(mContext.getPackageName().equals(deviceType)) {
                     continue;
                 }
+                System.out.print("id:"+id);
+                System.out.print(", deviceType:"+deviceType);
+                System.out.print(", protocolId:"+protocolId);
+                System.out.print(", name:"+name);
+                System.out.println();
                 registerDevice(new DeviceData.Builder(PROTOCOL_NAME, id, deviceType,
                         name, true, LOCALHOST).build());
             }
         }
+    }
+
+    protected String callGetProcedure(Uri original) throws URISyntaxException, IOException {
+        DConnectMessage message = new DConnectResponseMessage(DConnectMessage.RESULT_ERROR);
+        URIBuilder uriBuilder = new URIBuilder();
+//        uriBuilder.setProfile(ServiceInformationProfileConstants.PROFILE_NAME);
+        uriBuilder.setPath(original.getPath());
+        uriBuilder.setScheme("http");
+        uriBuilder.setHost("localhost");
+        uriBuilder.setPort(4035);
+//        uriBuilder.addParameter(DConnectMessage.EXTRA_SERVICE_ID,
+//                devices.get(0).getId());
+        uriBuilder.addParameter(DConnectMessage.EXTRA_SERVICE_ID, original.getQueryParameter(DConnectMessage.EXTRA_SERVICE_ID));
+
+        uriBuilder.addParameter(DConnectMessage.EXTRA_ACCESS_TOKEN, AccessTokenPreference.getAccessToken(mContext));
+
+        HttpUriRequest req = new HttpGet(uriBuilder.build());
+        req.addHeader("origin", mContext.getPackageName());
+        HttpClient client = new DefaultHttpClient();
+        HttpResponse res = client.execute(req);
+        final String result = EntityUtils.toString(res.getEntity(), "UTF-8");
+        return result;
     }
 }

@@ -176,7 +176,7 @@ public class GotAPIPluginService extends Service {
                             set.add(data);
                             break;
                         } catch (PackageManager.NameNotFoundException e) {
-                            e.printStackTrace();
+//                            e.printStackTrace();
                         }
                     }
                 }

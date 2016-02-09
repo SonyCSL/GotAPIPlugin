@@ -1,6 +1,10 @@
-include ':app'
+include ':app'//, ':libraries'
+//include 'dconnect-sdk-for-android'
+//project(':dconnect-sdk-for-android').projectDir = new File('../DeviceConnect-Android/dConnectSDK/dConnectSDKForAndroid')
+//include 'dconnect-device-plugin-sdk'
+//project(':dconnect-device-plugin-sdk').projectDir = new File('../DeviceConnect-Android/dConnectDevicePlugin/dConnectDevicePluginSDK')
+//
 include 'dconnect-sdk-for-android'
-project(':dconnect-sdk-for-android').projectDir = new File('../dConnectSDK/dConnectSDKForAndroid')
+project(':dconnect-sdk-for-android').projectDir = new File('../DeviceConnect-Android/dConnectSDK/dConnectSDKForAndroid/dconnect-sdk-for-android')
 include 'dconnect-device-plugin-sdk'
-project(':dconnect-device-plugin-sdk').projectDir = new File('../dConnectDevicePluginSDK')
-
+project(':dconnect-device-plugin-sdk').projectDir = new File('../DeviceConnect-Android/dConnectDevicePlugin/dConnectDevicePluginSDK/dconnect-device-plugin-sdk')

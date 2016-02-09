@@ -2,7 +2,7 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 21
-    buildToolsVersion "21.1.2"
+    buildToolsVersion "23.0.0"
 
     defaultConfig {
         applicationId "com.sonycsl.Kadecot.plugin.gotapi"
@@ -17,6 +17,12 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    packagingOptions {
+        exclude 'LICENSE.txt'
+        exclude 'META-INF/DEPENDENCIES'
+        exclude 'META-INF/NOTICE'
+        exclude 'META-INF/LICENSE'
+    }
 }
 /////////////////////////////// Refer to local maven repositories ///////////////////////////////
 repositories{
@@ -26,6 +32,12 @@ repositories{
     flatDir {
         dir '../../kadecotcore/app/build/outputs/aar'
     }
+    flatDir {
+        dir '../../DeviceConnect-Android/dConnectSDK/dConnectSDKForAndroid/dconnect-sdk-for-android/build/outputs/aar'
+    }
+    flatDir {
+        dir '../../DeviceConnect-Android/dConnectDevicePlugin/dConnectDevicePluginSDK/dconnect-device-plugin-sdk/build/outputs/aar'
+    }
 }
 configurations.all {
     // check for updates every build
@@ -33,10 +45,18 @@ configurations.all {
 }
 
 dependencies {
+//    compile project(':libraries')
     compile(name:'wamp-app-debug', ext:'aar')
     compile(name:'kadecotcore-app-debug', ext:'aar')
+    //compile(name:'dconnect-sdk-for-android-debug', ext:'aar')
+
+    compile project(':dconnect-device-plugin-sdk')
+//    compile(name:'dconnect-device-plugin-sdk-debug', ext:'aar')
+
 
     //compile 'com.android.support:appcompat-v7:21.0.3'
-    compile project(':dconnect-device-plugin-sdk')
+    //compile project(path: ':dconnect-device-plugin-sdk', configuration: 'compile')
+//    releaseCompile project(path: ':dconnect-device-plugin-sdk', configuration: 'release')
+    //debugCompile project(path: ':dconnect-device-plugin-sdk', configuration: 'debug')
 
 }
