@@ -8,10 +8,10 @@
         <option name="gradleJvm" value="1.8" />
         <option name="modules">
           <set>
+            <option value="$PROJECT_DIR$/../DeviceConnect-Android/dConnectDevicePlugin/dConnectDevicePluginSDK/dconnect-device-plugin-sdk" />
+            <option value="$PROJECT_DIR$/../DeviceConnect-Android/dConnectSDK/dConnectSDKForAndroid/dconnect-sdk-for-android" />
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/app" />
-            <option value="$PROJECT_DIR$/../dConnectDevicePluginSDK" />
-            <option value="$PROJECT_DIR$/../dConnectSDK/dConnectSDKForAndroid" />
           </set>
         </option>
       </GradleProjectSettings>
