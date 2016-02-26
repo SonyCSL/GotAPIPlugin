@@ -1,7 +1,6 @@
 package com.sonycsl.Kadecot.plugin.gotapi;
 
 import android.content.Context;
-import android.net.Uri;
 import android.os.Handler;
 
 import com.sonycsl.Kadecot.plugin.DeviceData;
@@ -12,18 +11,28 @@ import com.sonycsl.wamp.message.WampMessageFactory;
 import com.sonycsl.wamp.message.WampMessageType;
 import com.sonycsl.wamp.role.WampCallee;
 
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
+import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
 import org.deviceconnect.message.DConnectMessage;
 import org.deviceconnect.message.basic.message.DConnectResponseMessage;
 import org.deviceconnect.message.http.impl.factory.HttpMessageFactory;
 import org.deviceconnect.profile.AuthorizationProfileConstants;
+import org.deviceconnect.profile.AvailabilityProfileConstants;
 import org.deviceconnect.profile.BatteryProfileConstants;
+import org.deviceconnect.profile.CanvasProfileConstants;
 import org.deviceconnect.profile.ConnectProfileConstants;
 import org.deviceconnect.profile.DeviceOrientationProfileConstants;
 import org.deviceconnect.profile.FileDescriptorProfileConstants;
@@ -46,8 +55,10 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -65,8 +76,12 @@ public class GotAPIClient extends KadecotProtocolClient {
     private static final String PRE_FIX = "com.sonycsl.kadecot." + PROTOCOL_NAME;
     private static final String PROCEDURE = ".procedure.";
     private static final String TOPIC = ".topic.";
+    private static final String GOT_API_SYSTEM_UUID = "gotapi";
 
     private static final String DELAY_PUBLISH_TOPIC = PRE_FIX + TOPIC + "delaypublish";
+
+    private static final String ARGS_KEY_ATTRIBUTE = "attribute";
+    private static final String ARGS_KEY_INTERFACE = "interface";
 
     private Context mContext;
     private Handler mHandler;
@@ -75,7 +90,7 @@ public class GotAPIClient extends KadecotProtocolClient {
 
     private HashMap<String, String> mDeviceTypeDict;
 
-    private String[] scopes = {
+    private final String[] scopes = {
             ServiceInformationProfileConstants.PROFILE_NAME,
             AuthorizationProfileConstants.PROFILE_NAME,
             BatteryProfileConstants.PROFILE_NAME,
@@ -91,7 +106,10 @@ public class GotAPIClient extends KadecotProtocolClient {
             ProximityProfileConstants.PROFILE_NAME,
             SettingsProfileConstants.PROFILE_NAME,
             SystemProfileConstants.PROFILE_NAME,
+            ServiceDiscoveryProfileConstants.PROFILE_NAME,
             VibrationProfileConstants.PROFILE_NAME,
+            AvailabilityProfileConstants.PROFILE_NAME,
+            CanvasProfileConstants.PROFILE_NAME,
 
             // 独自プロファイル
             "light",
@@ -101,8 +119,24 @@ public class GotAPIClient extends KadecotProtocolClient {
             "sphero",
             "drive_controller",
             "remote_controller",
-            "mhealth",
+            "health",
+            "airconditioner",
+            "canvas",
+            "keyevent",
+            "touch",
 
+    };
+
+    private final String HTTP_METHOD_GET = "get";
+    private final String HTTP_METHOD_POST = "post";
+    private final String HTTP_METHOD_DELETE = "delete";
+    private final String HTTP_METHOD_PUT = "put";
+
+    private final String[] httpMethods = new String[] {
+            HTTP_METHOD_GET,
+            HTTP_METHOD_POST,
+            HTTP_METHOD_DELETE,
+            HTTP_METHOD_PUT,
     };
     private AuthProcesser.AuthorizationHandler mAuthHandler
             = new AuthProcesser.AuthorizationHandler() {
@@ -123,48 +157,48 @@ public class GotAPIClient extends KadecotProtocolClient {
     };
 
     /* profile -> procedure */
-    public static enum Procedure {
-        PROCEDURE1("procedure1", "http://example.plugin.explanation/procedure1"),
-        PROCEDURE2("procedure2", "http://example.plugin.explanation/procedure2"),
-        TESTPUBLISH("testpublish", "http://example.plugin.explanation/testpublish"),
-        ECHO("echo", "http://example.plugin.explanation/echo"),
-        GET("get", "http://kadecot.sonycsl.com/plugin/gotapi/get"), ;
-
-        private final String mUri;
-        private final String mServiceName;
-        private final String mDescription;
-
-        /**
-         * @param servicename
-         * @param description is displayed on JSONP called /v
-         */
-        Procedure(String servicename, String description) {
-            mUri = PRE_FIX + PROCEDURE + servicename;
-            mServiceName = servicename;
-            mDescription = description;
-        }
-
-        public String getUri() {
-            return mUri;
-        }
-
-        public String getServiceName() {
-            return mServiceName;
-        }
-
-        public String getDescription() {
-            return mDescription;
-        }
-
-        public static Procedure getEnum(String procedure) {
-            for (Procedure p : Procedure.values()) {
-                if (p.getUri().equals(procedure)) {
-                    return p;
-                }
-            }
-            return null;
-        }
-    }
+//    public static enum Procedure {
+//        PROCEDURE1("procedure1", "http://example.plugin.explanation/procedure1"),
+//        PROCEDURE2("procedure2", "http://example.plugin.explanation/procedure2"),
+//        TESTPUBLISH("testpublish", "http://example.plugin.explanation/testpublish"),
+//        ECHO("echo", "http://example.plugin.explanation/echo"),
+//        GET("get", "http://kadecot.sonycsl.com/plugin/gotapi/get"), ;
+//
+//        private final String mUri;
+//        private final String mServiceName;
+//        private final String mDescription;
+//
+//        /**
+//         * @param servicename
+//         * @param description is displayed on JSONP called /v
+//         */
+//        Procedure(String servicename, String description) {
+//            mUri = PRE_FIX + PROCEDURE + servicename;
+//            mServiceName = servicename;
+//            mDescription = description;
+//        }
+//
+//        public String getUri() {
+//            return mUri;
+//        }
+//
+//        public String getServiceName() {
+//            return mServiceName;
+//        }
+//
+//        public String getDescription() {
+//            return mDescription;
+//        }
+//
+//        public static Procedure getEnum(String procedure) {
+//            for (Procedure p : Procedure.values()) {
+//                if (p.getUri().equals(procedure)) {
+//                    return p;
+//                }
+//            }
+//            return null;
+//        }
+//    }
 
     public GotAPIClient(Context context) {
         mHandler = new Handler();
@@ -186,8 +220,12 @@ public class GotAPIClient extends KadecotProtocolClient {
     @Override
     public Map<String, String> getRegisterableProcedures() {
         Map<String, String> procs = new HashMap<String, String>();
-        for (Procedure p : Procedure.values()) {
-            procs.put(p.getUri(), p.getDescription());
+        for (String profile : scopes) {
+            for(String m : httpMethods) {
+                String uri = PRE_FIX + PROCEDURE + profile + "." + m;
+                String description = "http://kadecot.sonycsl.com/plugin/gotapi/" + profile + "/" + m;
+                procs.put(uri, description);
+            }
         }
         return procs;
     }
@@ -208,7 +246,7 @@ public class GotAPIClient extends KadecotProtocolClient {
             @Override
             public void run() {
                 if(isGotAPIAvailable(LOCALHOST, GOT_API_PORT)) {
-                    registerDevice(new DeviceData.Builder(PROTOCOL_NAME, "gotapi", DEVICE_TYPE_DEVICE_CONNECT,
+                    registerDevice(new DeviceData.Builder(PROTOCOL_NAME, GOT_API_SYSTEM_UUID, DEVICE_TYPE_DEVICE_CONNECT,
                             "GotAPI", true, LOCALHOST).build());
 
                     searchGotAPIDevice(LOCALHOST, GOT_API_PORT);
@@ -230,51 +268,25 @@ public class GotAPIClient extends KadecotProtocolClient {
                                 final JSONObject argumentsKw, final WampCallee.WampInvocationReplyListener listener) {
 
         try {
-            final Procedure proc = Procedure.getEnum(procedure);
-
-            if(proc == Procedure.GET) {
-                String url = argumentsKw.getString("url");
-                String result = callGetProcedure(Uri.parse(url));
-                listener.replyYield(WampMessageFactory.createYield(requestId, new JSONObject(),
-                        new JSONArray(),
-                        new JSONObject(result))
-                        .asYieldMessage());
-                return;
+            String serviceId = uuid;
+            if(GOT_API_SYSTEM_UUID.equals(uuid)) {
+                serviceId = null;
             }
-            if (proc == Procedure.ECHO) {
-                listener.replyYield(WampMessageFactory.createYield(requestId, new JSONObject(),
-                        new JSONArray(),
-                        new JSONObject().put("text", argumentsKw.getString("text")))
-                        .asYieldMessage());
-                return;
-            }
+            String procedureName = procedure.substring((PRE_FIX+PROCEDURE).length());
+            int d = procedureName.lastIndexOf(".");
+            final String profile = procedureName.substring(0, d);
+            final String httpMethod = procedureName.substring(d + 1);
 
-            if (proc == Procedure.TESTPUBLISH) {
-                mHandler.postDelayed(new Runnable() {
 
-                    @Override
-                    public void run() {
-                        sendPublish(uuid, DELAY_PUBLISH_TOPIC, new JSONArray(),
-                                new JSONObject());
-                    }
-                }, 5000);
 
-                listener.replyYield(WampMessageFactory.createYield(requestId, new JSONObject(),
-                        new JSONArray(),
-                        new JSONObject().put("result", "Do Publish after 5s"))
-                        .asYieldMessage());
-                return;
-            }
-
-            /**
-             * Return YIELD message as a result of INVOCATION.
-             */
-            JSONObject argumentKw = new JSONObject().put("targetDevice", uuid).put(
-                    "calledProcedure", procedure);
-
+            String result = callGotAPI(serviceId, profile, argumentsKw, httpMethod);
             listener.replyYield(WampMessageFactory.createYield(requestId, new JSONObject(),
-                    new JSONArray(), argumentKw).asYieldMessage());
+                    new JSONArray(),
+                    new JSONObject(result))
+                    .asYieldMessage());
+
         } catch (Exception e) {
+            e.printStackTrace();
             listener.replyError(WampMessageFactory
                     .createError(WampMessageType.INVOCATION, requestId,
                             new JSONObject(), WampError.INVALID_ARGUMENT, new JSONArray(),
@@ -364,39 +376,87 @@ public class GotAPIClient extends KadecotProtocolClient {
                 int start = id.substring(0,end).lastIndexOf('.')+1;
                 String protocolId = id.substring(start);
                 String deviceType = mDeviceTypeDict.get(protocolId);
-                if(mContext.getPackageName().equals(deviceType)) {
-                    continue;
-                }
                 System.out.print("id:"+id);
                 System.out.print(", deviceType:"+deviceType);
                 System.out.print(", protocolId:"+protocolId);
                 System.out.print(", name:"+name);
                 System.out.println();
+                if(mContext.getPackageName().equals(deviceType)) {
+                    continue;
+                }
                 registerDevice(new DeviceData.Builder(PROTOCOL_NAME, id, deviceType,
                         name, true, LOCALHOST).build());
             }
         }
     }
 
-    protected String callGetProcedure(Uri original) throws URISyntaxException, IOException {
-        DConnectMessage message = new DConnectResponseMessage(DConnectMessage.RESULT_ERROR);
+    protected String callGotAPI(String serviceId, String profile, JSONObject args, String httpMethod) throws URISyntaxException, IOException, JSONException {
+
         URIBuilder uriBuilder = new URIBuilder();
-//        uriBuilder.setProfile(ServiceInformationProfileConstants.PROFILE_NAME);
-        uriBuilder.setPath(original.getPath());
+
         uriBuilder.setScheme("http");
         uriBuilder.setHost("localhost");
         uriBuilder.setPort(4035);
-//        uriBuilder.addParameter(DConnectMessage.EXTRA_SERVICE_ID,
-//                devices.get(0).getId());
-        uriBuilder.addParameter(DConnectMessage.EXTRA_SERVICE_ID, original.getQueryParameter(DConnectMessage.EXTRA_SERVICE_ID));
 
-        uriBuilder.addParameter(DConnectMessage.EXTRA_ACCESS_TOKEN, AccessTokenPreference.getAccessToken(mContext));
+        uriBuilder.setProfile(profile);
 
-        HttpUriRequest req = new HttpGet(uriBuilder.build());
+        if(serviceId != null) {
+            uriBuilder.addParameter(DConnectMessage.EXTRA_SERVICE_ID, serviceId);
+        }
+
+        ArrayList<NameValuePair> params = new ArrayList<NameValuePair>();
+
+
+        Iterator<String> iter = args.keys();
+        while (iter.hasNext()){
+            String key = iter.next();
+            if(ARGS_KEY_ATTRIBUTE.equals(key)) {
+                uriBuilder.setAttribute(args.getString(ARGS_KEY_ATTRIBUTE));
+            } else if(ARGS_KEY_INTERFACE.equals(key)) {
+                uriBuilder.setInterface(args.getString(ARGS_KEY_INTERFACE));
+            } else {
+                if(HTTP_METHOD_GET.equals(httpMethod) || HTTP_METHOD_DELETE.equals(httpMethod)) {
+                    uriBuilder.addParameter(key, args.getString(key));
+                } else {
+                    params.add(new BasicNameValuePair(key, args.getString(key)));
+                }
+            }
+
+        }
+
+        if(HTTP_METHOD_GET.equals(httpMethod) || HTTP_METHOD_DELETE.equals(httpMethod)) {
+            uriBuilder.addParameter(DConnectMessage.EXTRA_ACCESS_TOKEN, AccessTokenPreference.getAccessToken(mContext));
+        } else {
+            params.add(new BasicNameValuePair(DConnectMessage.EXTRA_ACCESS_TOKEN, AccessTokenPreference.getAccessToken(mContext)));
+        }
+
+        System.out.println("uri:"+uriBuilder.build());
+
+        HttpUriRequest req = null;
+        if(HTTP_METHOD_GET.equals(httpMethod)) {
+            req = new HttpGet(uriBuilder.build());
+        } else if(HTTP_METHOD_POST.equals(httpMethod)) {
+            HttpPost post = new HttpPost(uriBuilder.build());
+            post.setEntity(new UrlEncodedFormEntity(params, HTTP.UTF_8));
+            post.setHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
+            req = post;
+        } else if(HTTP_METHOD_DELETE.equals(httpMethod)) {
+            req = new HttpDelete(uriBuilder.build());
+        } else if(HTTP_METHOD_PUT.equals(httpMethod)) {
+            HttpPut put = new HttpPut(uriBuilder.build());
+            put.setEntity(new UrlEncodedFormEntity(params, HTTP.UTF_8));
+            put.setHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
+            req = put;
+        }
         req.addHeader("origin", mContext.getPackageName());
         HttpClient client = new DefaultHttpClient();
         HttpResponse res = client.execute(req);
-        final String result = EntityUtils.toString(res.getEntity(), "UTF-8");
+        HttpEntity entity = res.getEntity();
+        final String result = EntityUtils.toString(entity, "UTF-8");
+        if(entity != null) {
+            entity.consumeContent();
+            req.abort();
+        }
         return result;
     }
 }
