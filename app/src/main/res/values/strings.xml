@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">GotAPIPlugin</string>
+    <string name="app_name">Kadecot GotAPIPlugin</string>
     <string name="got_api_preferences_file_name">got_api_preferences</string>
     <string name="access_token_preference_key">access_token_preference_key</string>
 </resources>
