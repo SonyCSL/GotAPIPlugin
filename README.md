@@ -25,9 +25,16 @@ DELETE: http://[Kadecot IP]:31413/jsonp/v1/devices/11?procedure=light.delete&par
 PUT:    http://[Kadecot IP]:31413/jsonp/v1/devices/11?procedure=light.put&params={lightId:6,name=%22moe%22,color:%2200FF00%22}
 
 
-# How to compile
+# How to update dconnect-sdk-for-android.jar
 
-You need to locate "DeviceConnect-Android" in the [GotAPI source repository](https://github.com/DeviceConnect/DeviceConnect-Android) at the same directory level as GotAPIPlugin.
+When [dConnect SDK for Android](https://github.com/DeviceConnect/DeviceConnect-Android/tree/master/dConnectSDK/dConnectSDKForAndroid) is updated,
+you should make new **dconnect-sdk-for-android.jar**.
+  
+How to make dconnect-sdk-for-android.jar
+
+1. Extract dconnect-sdk-for-android/build/outputs/aar/dconnect-sdk-for-android-debug.aar.
+2. Rename classes.jar to dconnect-sdk-for-android.jar.
+3. Move dconnect-sdk-for-android.jar to libraries/libs in this project.
  
 # ToDo
 - Currently, this plugin is an apk. However, we would like to link this to our official Kadecot release in future. A difficulty is in websocket library conflict
