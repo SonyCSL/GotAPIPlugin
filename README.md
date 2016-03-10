@@ -35,6 +35,3 @@ How to make dconnect-sdk-for-android.jar
 1. Extract dconnect-sdk-for-android/build/outputs/aar/dconnect-sdk-for-android-debug.aar.
 2. Rename classes.jar to dconnect-sdk-for-android.jar.
 3. Move dconnect-sdk-for-android.jar to libraries/libs in this project.
- 
-# ToDo
-- Currently, this plugin is an apk. However, we would like to link this to our official Kadecot release in future. A difficulty is in websocket library conflict
