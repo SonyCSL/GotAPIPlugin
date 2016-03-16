@@ -1,7 +1,7 @@
 <component name="libraryTable">
   <library name="httpclient-4.5">
     <CLASSES>
-      <root url="jar://$PROJECT_DIR$/../DeviceConnect-Android/dConnectSDK/dConnectSDKForAndroid/dconnect-sdk-for-android/libs/httpclient-4.5.jar!/" />
+      <root url="jar://$PROJECT_DIR$/libraries/libs/httpclient-4.5.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />
