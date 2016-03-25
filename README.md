@@ -22,22 +22,22 @@ http://[kip]:31413/jsonp/v1/devices/[gid]?procedure=system.get&params={}
 Obtain services supported by each device:
 http://[kip]:31413/jsonp/v1/devices/[did]?procedure=serviceinformation.get&params={}
 
-Examples for [light profile](https://github.com/deviceconnect/DeviceConnect-JS/wiki/Light-Profile)
-GET:    http://[kip]:31413/jsonp/v1/devices/[did]?procedure=light.get&params={}
-POST:   http://[kip]:31413/jsonp/v1/devices/[did]?procedure=light.post&params={lightId:6,color:"0000FF"}
-DELETE: http://[kip]:31413/jsonp/v1/devices/[did]?procedure=light.delete&params={lightId:6}
-PUT:    http://[kip]:31413/jsonp/v1/devices/[did]?procedure=light.put&params={lightId:6,name="some light name",color:"00FF00"}
+Examples for [light profile](https://github.com/deviceconnect/DeviceConnect-JS/wiki/Light-Profile)  
++ GET:    http://[kip]:31413/jsonp/v1/devices/[did]?procedure=light.get&params={}  
++ POST:   http://[kip]:31413/jsonp/v1/devices/[did]?procedure=light.post&params={lightId:6,color:"0000FF"}  
++ DELETE: http://[kip]:31413/jsonp/v1/devices/[did]?procedure=light.delete&params={lightId:6}  
++ PUT:    http://[kip]:31413/jsonp/v1/devices/[did]?procedure=light.put&params={lightId:6,name="some light name",color:"00FF00"}  
 
 Examples for Host-related profiles (Android terminal)
-+ [Vibration-Profile](https://github.com/deviceconnect/DeviceConnect-JS/wiki/Vibration-Profile)
++ [Vibration-Profile](https://github.com/deviceconnect/DeviceConnect-JS/wiki/Vibration-Profile)  
 http://[kip]:31413/jsonp/v1/devices/13?procedure=vibration.put&params={interface:"vibrate"}
-+ [Phone-Profile](https://github.com/deviceconnect/DeviceConnect-JS/wiki/Phone-Profile)
-++ Phone call
-http://[kip]:31413/jsonp/v1/devices/[did]?procedure=phone.post&params={interface:"call",phoneNumber:"08054137092"}
-+[MediaStreamRecording-Profile](https://github.com/deviceconnect/DeviceConnect-JS/wiki/MediaStreamRecording-Profile)
-++ Get available cameras
++ [Phone-Profile](https://github.com/deviceconnect/DeviceConnect-JS/wiki/Phone-Profile)  
+ + Phone call  
+http://[kip]:31413/jsonp/v1/devices/[did]?procedure=phone.post&params={interface:"call",phoneNumber:"08054137092"
++ [MediaStreamRecording-Profile](https://github.com/deviceconnect/DeviceConnect-JS/wiki/MediaStreamRecording-Profile)
+ + Get available cameras  
 http://[kip]:31413/jsonp/v1/devices/[did]?procedure=mediastream_recording.get&params={interface:"mediarecorder"}
-++ Take photo
+ + Take photo  
 http://[kip]:31413/jsonp/v1/devices/[did]?procedure=mediastream_recording.post&params={interface:"takephoto"}
 
 Asynchronous API access is currently unsupported.
