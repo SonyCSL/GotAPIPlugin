@@ -24,4 +24,7 @@ dependencies {
     compile files('libs/httpclient-4.5.jar')
     compile files('libs/java_websocket.jar')
     compile files('libs/dconnect-sdk-for-android.jar')
+    compile files('libs/dconnect-device-plugin-sdk-release-aar.jar')
+    compile 'com.android.support:support-v4:21.0.0'
+    compile 'com.android.support:multidex:1.0.0'
 }
