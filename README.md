@@ -1,29 +1,46 @@
 # GotAPIPlugin
 GotAPI plugin for Kadecot
 
-[GotAPI](https://device-webapi.org/) is an [open-source](https://github.com/DeviceConnect), Android-hosted device API standardized by OMA. This hybrid plugin provides [ECHONET Lite](http://www.echonet.gr.jp/) and other devices access to GotAPI server through Kadecot JSONP API.
+[GotAPI](https://device-webapi.org/) is an [open-source](https://github.com/DeviceConnect), Android-hosted device API standardized by OMA. This hybrid plugin provides to Kadecot bridge access to GotAPI, while to GotAPI server bridge access to Kadecot.
 
 # How to use
 1. Install [Kadecot](https://play.google.com/store/apps/details?id=com.sonycsl.Kadecot) and GotAPI server (such as [Device Web API Manager by GClue.inc](https://play.google.com/store/apps/details?id=org.deviceconnect.android.manager) ) to your Android phone.
-2. Install also app-debug.apk in this repository.
-3. Boot Kadecot as usual, then you will find GotAPI icon within devices list, as well as other smart appliances supported by Kadecot. 
+2. Boot Kadecot as usual, then you will find GotAPI and related devices icon within devices list, as well as other smart appliances supported by Kadecot. 
 
-Then you are all set. GotAPI server should already recognize Kadecot and provide access to ECHONET Lite and other devices through "kadecot" profile. The arguments and reply structure is described in [Kadecot API page](http://kadecot.net/blog/2750/).
+Then you are all set. You don't need to install this plugin by yourself, because this is now statically linked to the Kadecot's official release. GotAPI server should already recognize Kadecot and provide access to ECHONET Lite and other devices through "kadecot" profile. The arguments and reply structure is described in [Kadecot API page](http://kadecot.net/blog/2750/).
 
 # How to access via JSONP
 
-Obtain services suppoted by the system and plugins: 
-http://[Kadecot IP]:31413/jsonp/v1/devices/1?procedure=system.get&params={}
+Terms:  
+[kip] : IP address of Kadecot  
+[gid] : Device ID of "GotAPI" device in Kadecot  
+[did] : Device ID of specific GotAPI device in Kadecot  
 
-Obtain services supported by each device:
-http://[Kadecot IP]:31413/jsonp/v1/devices/11?procedure=serviceinformation.get&params={}
++ Obtain services suppoted by the system and plugins:  
+http://[kip]:31413/jsonp/v1/devices/[gid]?procedure=system.get&params={}
 
-Operation examples for light service
-GET:    http://[Kadecot IP]:31413/jsonp/v1/devices/11?procedure=light.get&params={}
-POST:   http://[Kadecot IP]:31413/jsonp/v1/devices/11?procedure=light.post&params={lightId:6,color:%220000FF%22}
-DELETE: http://[Kadecot IP]:31413/jsonp/v1/devices/11?procedure=light.delete&params={lightId:6}
-PUT:    http://[Kadecot IP]:31413/jsonp/v1/devices/11?procedure=light.put&params={lightId:6,name=%22moe%22,color:%2200FF00%22}
++ Obtain services supported by each device:  
+http://[kip]:31413/jsonp/v1/devices/[did]?procedure=serviceinformation.get&params={}
 
++ Examples for [light profile](https://github.com/deviceconnect/DeviceConnect-JS/wiki/Light-Profile)  
+ + GET:    http://[kip]:31413/jsonp/v1/devices/[did]?procedure=light.get&params={}  
+ + POST:   http://[kip]:31413/jsonp/v1/devices/[did]?procedure=light.post&params={lightId:6,color:"0000FF"}  
+ + DELETE: http://[kip]:31413/jsonp/v1/devices/[did]?procedure=light.delete&params={lightId:6}  
+ + PUT:    http://[kip]:31413/jsonp/v1/devices/[did]?procedure=light.put&params={lightId:6,name="some light name",color:"00FF00"}  
+
++ Examples for Host-related profiles (Android terminal)
+ + [Vibration-Profile](https://github.com/deviceconnect/DeviceConnect-JS/wiki/Vibration-Profile)  
+http://[kip]:31413/jsonp/v1/devices/13?procedure=vibration.put&params={interface:"vibrate"}
+ + [Phone-Profile](https://github.com/deviceconnect/DeviceConnect-JS/wiki/Phone-Profile)  
+  + Phone call  
+http://[kip]:31413/jsonp/v1/devices/[did]?procedure=phone.post&params={interface:"call",phoneNumber:"08054137092"
+ + [MediaStreamRecording-Profile](https://github.com/deviceconnect/DeviceConnect-JS/wiki/MediaStreamRecording-Profile)
+  + Get available cameras  
+http://[kip]:31413/jsonp/v1/devices/[did]?procedure=mediastream_recording.get&params={interface:"mediarecorder"}
+  + Take photo  
+http://[kip]:31413/jsonp/v1/devices/[did]?procedure=mediastream_recording.post&params={interface:"takephoto"}
+
+Asynchronous API access is currently unsupported.
 
 # How to update dconnect-sdk-for-android.jar
 
