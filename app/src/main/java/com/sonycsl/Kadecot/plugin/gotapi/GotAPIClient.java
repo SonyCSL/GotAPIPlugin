@@ -156,50 +156,6 @@ public class GotAPIClient extends KadecotProtocolClient {
 
     };
 
-    /* profile -> procedure */
-//    public static enum Procedure {
-//        PROCEDURE1("procedure1", "http://example.plugin.explanation/procedure1"),
-//        PROCEDURE2("procedure2", "http://example.plugin.explanation/procedure2"),
-//        TESTPUBLISH("testpublish", "http://example.plugin.explanation/testpublish"),
-//        ECHO("echo", "http://example.plugin.explanation/echo"),
-//        GET("get", "http://kadecot.sonycsl.com/plugin/gotapi/get"), ;
-//
-//        private final String mUri;
-//        private final String mServiceName;
-//        private final String mDescription;
-//
-//        /**
-//         * @param servicename
-//         * @param description is displayed on JSONP called /v
-//         */
-//        Procedure(String servicename, String description) {
-//            mUri = PRE_FIX + PROCEDURE + servicename;
-//            mServiceName = servicename;
-//            mDescription = description;
-//        }
-//
-//        public String getUri() {
-//            return mUri;
-//        }
-//
-//        public String getServiceName() {
-//            return mServiceName;
-//        }
-//
-//        public String getDescription() {
-//            return mDescription;
-//        }
-//
-//        public static Procedure getEnum(String procedure) {
-//            for (Procedure p : Procedure.values()) {
-//                if (p.getUri().equals(procedure)) {
-//                    return p;
-//                }
-//            }
-//            return null;
-//        }
-//    }
-
     public GotAPIClient(Context context) {
         mHandler = new Handler();
         mContext = context;
@@ -268,7 +224,7 @@ public class GotAPIClient extends KadecotProtocolClient {
                                 final JSONObject argumentsKw, final WampCallee.WampInvocationReplyListener listener) {
 
         try {
-            String serviceId = uuid;
+            String serviceId = uuid.substring(uuid.lastIndexOf(":")+1);
             if(GOT_API_SYSTEM_UUID.equals(uuid)) {
                 serviceId = null;
             }
@@ -384,7 +340,14 @@ public class GotAPIClient extends KadecotProtocolClient {
                 if(mContext.getPackageName().equals(deviceType)) {
                     continue;
                 }
-                registerDevice(new DeviceData.Builder(PROTOCOL_NAME, id, deviceType,
+                registerDevice(new DeviceData.Builder(PROTOCOL_NAME,
+                        PROTOCOL_NAME
+                                + ":" + deviceType.substring("org.deviceconnect.android.deviceplugin.".length()) // device name
+                                +":"+PROTOCOL_NAME  // company id
+                                +":0"   // version
+                                +":"+id.replace(":","_"), // unique id
+                        //id,
+                        deviceType,
                         name, true, LOCALHOST).build());
             }
         }
