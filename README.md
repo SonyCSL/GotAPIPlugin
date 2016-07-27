@@ -30,7 +30,9 @@ http://[kip]:31413/jsonp/v1/devices/[did]?procedure=serviceinformation.get&param
 
 + Examples for Host-related profiles (Android terminal)
  + [Vibration-Profile](https://github.com/deviceconnect/DeviceConnect-JS/wiki/Vibration-Profile)  
-http://[kip]:31413/jsonp/v1/devices/13?procedure=vibration.put&params={interface:"vibrate"}
+http://[kip]:31413/jsonp/v1/devices/[did]?procedure=vibration.put&params={interface:"vibrate"}
+ + [DeviceOrientation Profile](https://github.com/DeviceConnect/DeviceConnect-JS/wiki/DeviceOrientation-Profile)  
+ http://[kip]:31413/jsonp/v1/devices/[did]?procedure=deviceorientation.get&params={"attribute":"ondeviceorientation"}
  + [Phone-Profile](https://github.com/deviceconnect/DeviceConnect-JS/wiki/Phone-Profile)  
   + Phone call  
 http://[kip]:31413/jsonp/v1/devices/[did]?procedure=phone.post&params={interface:"call",phoneNumber:"08054137092"
