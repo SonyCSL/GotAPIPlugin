@@ -35,7 +35,7 @@ http://[kip]:31413/jsonp/v1/devices/[did]?procedure=vibration.put&params={interf
  http://[kip]:31413/jsonp/v1/devices/[did]?procedure=deviceorientation.get&params={"attribute":"ondeviceorientation"}
  + [Phone-Profile](https://github.com/deviceconnect/DeviceConnect-JS/wiki/Phone-Profile)  
   + Phone call  
-http://[kip]:31413/jsonp/v1/devices/[did]?procedure=phone.post&params={interface:"call",phoneNumber:"08054137092"
+http://[kip]:31413/jsonp/v1/devices/[did]?procedure=phone.post&params={interface:"call",phoneNumber:"090********"
  + [MediaStreamRecording-Profile](https://github.com/deviceconnect/DeviceConnect-JS/wiki/MediaStreamRecording-Profile)
   + Get available cameras  
 http://[kip]:31413/jsonp/v1/devices/[did]?procedure=mediastream_recording.get&params={interface:"mediarecorder"}
